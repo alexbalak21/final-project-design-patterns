@@ -2,7 +2,9 @@
 package inventory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * InventoryManager class manages all products in our inventory.
@@ -15,44 +17,150 @@ import java.util.List;
  */
 public class InventoryManager {
 
-    // List to store all our products
-    private List<Product> products;
+    // Map to store all our products by ID
+    private Map<String, Product> products;
 
     /**
      * Constructor creates a new empty inventory.
      */
     public InventoryManager() {
-        products = new ArrayList<>();
+        this.products = new HashMap<>();
     }
 
     /**
      * Add a new product to inventory using the Factory Pattern.
      *
-     * @param type     Type of product ("Book" or "Electronics")
+     * @param id       Unique product ID
      * @param name     Product name
+     * @param type     Type of product ("BOOK" or "ELECTRONICS")
      * @param price    Product price
      * @param quantity Initial stock quantity
-     * @return true if product was added successfully
      */
-    public boolean addProduct(String type, String name, double price, int quantity) {
+    public void addProduct(String id, String name, String type, double price, int quantity) {
         try {
             // Use Factory Pattern to create the product
-            Product product = ProductFactory.createProduct(type, name, price, quantity);
-
+            Product product = ProductFactory.createProduct(id, name, type, price, quantity);
+            
             // Add it to our inventory
-            products.add(product);
-
-            System.out.println("Added product: " + product.getName());
-            return true;
-
-        } catch (Exception e) {
+            products.put(id, product);
+            
+            System.out.println("Product added successfully: " + product);
+        } catch (IllegalArgumentException e) {
             System.out.println("Error adding product: " + e.getMessage());
-            return false;
         }
     }
 
     /**
-     * Find a product by name.
+     * Sell a product with discount calculation using Strategy Pattern.
+     *
+     * @param id           Product ID
+     * @param quantity     How many to sell
+     * @param discountType What type of discount to apply
+     */
+    public void sellProduct(String id, int quantity, String discountType) {
+        // Find the product
+        Product product = products.get(id);
+        if (product == null) {
+            System.out.println("Product not found: " + id);
+            return;
+        }
+
+        // Check if we have enough stock
+        if (!product.isInStock() || product.getQuantity() < quantity) {
+            System.out.println("Insufficient stock for product: " + id);
+            return;
+        }
+
+        // Calculate discount using Strategy pattern
+        DiscountCalculator.DiscountResult discount = 
+            DiscountCalculator.calculateDiscount(product, quantity, discountType);
+        
+        // Calculate total and apply discount
+        double totalPrice = product.getPrice() * quantity;
+        double finalPrice = totalPrice - discount.getDiscountAmount();
+        
+        // Update inventory
+        product.sell(quantity);
+        
+        // Display sale information
+        System.out.printf("Sale completed:%n");
+        System.out.printf("Product: %s%n", product.getName());
+        System.out.printf("Quantity: %d%n", quantity);
+        System.out.printf("Original Price: $%.2f%n", totalPrice);
+        System.out.printf("Discount: $%.2f (%s)%n", discount.getDiscountAmount(), discount.getDescription());
+        System.out.printf("Final Price: $%.2f%n", finalPrice);
+    }
+
+    /**
+     * Add more stock to an existing product.
+     *
+     * @param id       Product ID
+     * @param quantity How many items to add
+     */
+    public void addStock(String id, int quantity) {
+        Product product = products.get(id);
+        if (product == null) {
+            System.out.println("Product not found: " + id);
+            return;
+        }
+
+        product.addStock(quantity);
+        System.out.println("Added " + quantity + " items to " + product.getName() +
+                ". New stock: " + product.getQuantity());
+    }
+
+    /**
+     * Display all products in inventory.
+     */
+    public void viewInventory() {
+        System.out.println("\n=== INVENTORY LIST ===");
+
+        if (products.isEmpty()) {
+            System.out.println("No products in inventory.");
+        } else {
+            for (Product product : products.values()) {
+                System.out.println(product);
+            }
+        }
+
+        System.out.println("======================\n");
+    }
+
+    /**
+     * Get the total value of all inventory.
+     *
+     * @return Total value of all products
+     */
+    public double getInventoryValue() {
+        double total = 0.0;
+
+        for (Product product : products.values()) {
+            total += product.getPrice() * product.getQuantity();
+        }
+
+        return total;
+    }
+
+    /**
+     * Get products with stock below a specified threshold.
+     *
+     * @param threshold The stock level threshold
+     * @return List of products with low stock
+     */
+    public List<Product> getLowStockProducts(int threshold) {
+        List<Product> lowStock = new ArrayList<>();
+
+        for (Product product : products.values()) {
+            if (product.getQuantity() <= threshold) {
+                lowStock.add(product);
+            }
+        }
+
+        return lowStock;
+    }
+
+    /**
+     * Find a product by name (legacy method).
      * This searches through all products to find one with the given name.
      *
      * @param name The name of the product to find
@@ -60,7 +168,7 @@ public class InventoryManager {
      */
     public Product findProduct(String name) {
         // Look through all products
-        for (Product product : products) {
+        for (Product product : products.values()) {
             // Check if the name matches (ignoring upper/lower case)
             if (product.getName().equalsIgnoreCase(name)) {
                 return product;
@@ -70,14 +178,14 @@ public class InventoryManager {
     }
 
     /**
-     * Sell a product with discount calculation using Strategy Pattern.
+     * Sell a product with discount calculation using Strategy Pattern (legacy method).
      *
      * @param productName  Name of the product to sell
      * @param quantity     How many to sell
      * @param discountType What type of discount to apply
      * @return true if sale was successful
      */
-    public boolean sellProduct(String productName, int quantity, String discountType) {
+    public boolean sellProduct(String productName, int quantity, String discountType, boolean legacy) {
         // Find the product
         Product product = findProduct(productName);
         if (product == null) {
@@ -114,7 +222,7 @@ public class InventoryManager {
     }
 
     /**
-     * Display all products in inventory.
+     * Display all products in inventory (legacy method).
      */
     public void showInventory() {
         System.out.println("\n=== INVENTORY LIST ===");
@@ -139,7 +247,7 @@ public class InventoryManager {
     public List<Product> getProductsByType(String type) {
         List<Product> result = new ArrayList<>();
 
-        for (Product product : products) {
+        for (Product product : products.values()) {
             if (product.getType().equals(type)) {
                 result.add(product);
             }
@@ -149,24 +257,16 @@ public class InventoryManager {
     }
 
     /**
-     * Get products that are low in stock (5 or fewer items).
+     * Get products that are low in stock (5 or fewer items) - legacy method.
      *
      * @return List of products with low stock
      */
     public List<Product> getLowStockProducts() {
-        List<Product> lowStock = new ArrayList<>();
-
-        for (Product product : products) {
-            if (product.getQuantity() <= 5) {
-                lowStock.add(product);
-            }
-        }
-
-        return lowStock;
+        return getLowStockProducts(5);
     }
 
     /**
-     * Add more stock to an existing product.
+     * Add more stock to an existing product (legacy method).
      *
      * @param productName Name of the product
      * @param quantity    How many items to add
@@ -195,18 +295,12 @@ public class InventoryManager {
     }
 
     /**
-     * Get the total value of all inventory.
+     * Get the total value of all inventory (legacy method).
      *
      * @return Total value of all products
      */
     public double getTotalInventoryValue() {
-        double total = 0.0;
-
-        for (Product product : products) {
-            total += product.getPrice() * product.getQuantity();
-        }
-
-        return total;
+        return getInventoryValue();
     }
 
     /**

@@ -21,7 +21,82 @@ public class DiscountCalculator {
     public static final String NO_DISCOUNT = "None";
 
     /**
-     * Calculate discount based on the discount type.
+     * Inner class to hold discount calculation results.
+     */
+    public static class DiscountResult {
+        private double discountAmount;
+        private String description;
+
+        /**
+         * Constructor for DiscountResult.
+         * 
+         * @param discountAmount The amount of discount applied
+         * @param description    Description of the discount
+         */
+        public DiscountResult(double discountAmount, String description) {
+            this.discountAmount = discountAmount;
+            this.description = description;
+        }
+
+        /**
+         * Get the discount amount.
+         * 
+         * @return The discount amount
+         */
+        public double getDiscountAmount() {
+            return discountAmount;
+        }
+
+        /**
+         * Get the discount description.
+         * 
+         * @return The discount description
+         */
+        public String getDescription() {
+            return description;
+        }
+    }
+
+    /**
+     * Calculate discount based on the discount type and return detailed result.
+     * 
+     * @param product      The product we're buying
+     * @param quantity     How many items we're buying
+     * @param discountType What type of discount to apply
+     * @return DiscountResult containing discount amount and description
+     */
+    public static DiscountResult calculateDiscount(Product product, int quantity, String discountType) {
+        double discountAmount = 0.0;
+        String description = "No discount applied";
+        
+        switch (discountType.toUpperCase()) {
+            case "STUDENT":
+                if ("BOOK".equals(product.getType())) {
+                    discountAmount = product.getPrice() * quantity * 0.10;
+                    description = "Student discount: 10% off books";
+                } else {
+                    description = "Student discount only applies to books";
+                }
+                break;
+            case "BULK":
+                if (quantity >= 5) {
+                    discountAmount = product.getPrice() * quantity * 0.15;
+                    description = "Bulk discount: 15% off for 5+ items";
+                } else {
+                    description = "Bulk discount requires 5+ items";
+                }
+                break;
+            case "NONE":
+            default:
+                // No discount
+                break;
+        }
+        
+        return new DiscountResult(discountAmount, description);
+    }
+
+    /**
+     * Calculate discount based on the discount type (legacy method).
      * This is the main method that chooses which discount strategy to use.
      *
      * @param product      The product we're buying
@@ -29,7 +104,7 @@ public class DiscountCalculator {
      * @param discountType What type of discount to apply
      * @return The discount amount (money to subtract from total)
      */
-    public static double calculateDiscount(Product product, int quantity, String discountType) {
+    public static double calculateDiscount(Product product, int quantity, String discountType, boolean legacy) {
         // Choose which discount method to use based on the type
         switch (discountType) {
             case STUDENT_DISCOUNT:
