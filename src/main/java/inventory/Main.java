@@ -108,12 +108,12 @@ public class Main {
         double price = getDoubleInput("Enter price: $");
         int quantity = getIntInput("Enter initial quantity: ");
 
+        // Generate ID for the product
+        String id = generateProductId(productType);
+
         // Add the product using Factory Pattern
-        if (inventory.addProduct(productType, name, price, quantity)) {
-            System.out.println("Product added successfully!");
-        } else {
-            System.out.println("Failed to add product.");
-        }
+        inventory.addProduct(id, name, productType, price, quantity);
+        System.out.println("Product added successfully!");
 
         System.out.println();
     }
@@ -182,20 +182,36 @@ public class Main {
     }
 
     /**
+     * Helper method to generate a unique product ID based on type.
+     */
+    private static int bookCounter = 1;
+    private static int electronicsCounter = 1;
+
+    private static String generateProductId(String type) {
+        if ("Book".equalsIgnoreCase(type)) {
+            return "B" + String.format("%03d", bookCounter++);
+        } else if ("Electronics".equalsIgnoreCase(type)) {
+            return "E" + String.format("%03d", electronicsCounter++);
+        } else {
+            return "P" + System.currentTimeMillis();
+        }
+    }
+
+    /**
      * Add some sample products to demonstrate the system.
      */
     private static void addSampleProducts() {
         System.out.println("Adding sample products...");
 
         // Add sample books
-        inventory.addProduct("Book", "Java Programming", 29.99, 10);
-        inventory.addProduct("Book", "Data Structures", 34.99, 8);
-        inventory.addProduct("Book", "Web Development", 24.99, 15);
+        inventory.addProduct("B001", "Java Programming", "BOOK", 29.99, 10);
+        inventory.addProduct("B002", "Data Structures", "BOOK", 34.99, 8);
+        inventory.addProduct("B003", "Web Development", "BOOK", 24.99, 15);
 
         // Add sample electronics
-        inventory.addProduct("Electronics", "Laptop", 599.99, 5);
-        inventory.addProduct("Electronics", "Mouse", 19.99, 20);
-        inventory.addProduct("Electronics", "Keyboard", 49.99, 12);
+        inventory.addProduct("E001", "Laptop", "ELECTRONICS", 599.99, 5);
+        inventory.addProduct("E002", "Mouse", "ELECTRONICS", 19.99, 20);
+        inventory.addProduct("E003", "Keyboard", "ELECTRONICS", 49.99, 12);
 
         System.out.println("Sample products added!");
         System.out.println();

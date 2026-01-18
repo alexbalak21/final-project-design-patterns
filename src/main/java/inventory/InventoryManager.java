@@ -201,7 +201,7 @@ public class InventoryManager {
 
         // Calculate prices using Strategy Pattern
         double originalPrice = product.getPrice() * quantity;
-        double discount = DiscountCalculator.calculateDiscount(product, quantity, discountType);
+        double discount = DiscountCalculator.calculateDiscount(product, quantity, discountType, true);
         double finalPrice = originalPrice - discount;
 
         // Process the sale
@@ -265,25 +265,7 @@ public class InventoryManager {
         return getLowStockProducts(5);
     }
 
-    /**
-     * Add more stock to an existing product (legacy method).
-     *
-     * @param productName Name of the product
-     * @param quantity    How many items to add
-     * @return true if stock was added successfully
-     */
-    public boolean addStock(String productName, int quantity) {
-        Product product = findProduct(productName);
-        if (product == null) {
-            System.out.println("Product not found: " + productName);
-            return false;
-        }
 
-        product.addStock(quantity);
-        System.out.println("Added " + quantity + " items to " + productName +
-                ". New stock: " + product.getQuantity());
-        return true;
-    }
 
     /**
      * Get the total number of products in inventory.

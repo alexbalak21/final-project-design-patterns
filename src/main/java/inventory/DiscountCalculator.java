@@ -172,7 +172,7 @@ public class DiscountCalculator {
         double originalPrice = product.getPrice() * quantity;
 
         // Calculate discount amount
-        double discount = calculateDiscount(product, quantity, discountType);
+        double discount = calculateDiscount(product, quantity, discountType, true);
 
         // Return final price (original price minus discount)
         return originalPrice - discount;
@@ -188,7 +188,7 @@ public class DiscountCalculator {
      * @return A description of the discount
      */
     public static String getDiscountDescription(Product product, int quantity, String discountType) {
-        double discount = calculateDiscount(product, quantity, discountType);
+        double discount = calculateDiscount(product, quantity, discountType, true);
 
         if (discount > 0) {
             switch (discountType) {

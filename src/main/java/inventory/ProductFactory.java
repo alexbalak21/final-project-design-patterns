@@ -57,8 +57,11 @@ public class ProductFactory {
      * @return A new Product representing a book
      */
     public static Product createBook(String name, double price, int quantity) {
-        // Create a new product with type "Book"
-        Product book = new Product(name, "Book", price, quantity);
+        // Generate ID for the book
+        String id = "B" + System.currentTimeMillis();
+        
+        // Create a new product with type "BOOK"
+        Product book = new Product(id, name, "BOOK", price, quantity);
 
         // We could add book-specific logic here if needed
         // For example, books might have a minimum price
@@ -79,8 +82,11 @@ public class ProductFactory {
      * @return A new Product representing an electronic item
      */
     public static Product createElectronics(String name, double price, int quantity) {
-        // Create a new product with type "Electronics"
-        Product electronics = new Product(name, "Electronics", price, quantity);
+        // Generate ID for the electronics
+        String id = "E" + System.currentTimeMillis();
+        
+        // Create a new product with type "ELECTRONICS"
+        Product electronics = new Product(id, name, "ELECTRONICS", price, quantity);
 
         // Electronics might have special business rules
         // For example, electronics might have a minimum price
